@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <section id="login">
+        <form action="">
+            Login <input><br>
+            Senha <input><br>
+            <button>Entrar</button>
+        </form>
+    </section>
+    <section id="aplicativo">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Usuários</th>
+                    <th>Ação A</th>
+                    <th>Ação B</th>
+                    <th>Ação C</th>
+                    <th>
+                        <form onsubmit="adicionarAlcada(); return false">
+                            <input id="alcada"><button>adicionar</button>
+                        </form>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <form onsubmit="adicionarUsuario(); return false">
+            <input id="usuario"><button>adicionar</button>
+        </form>
+    </section>
+    <script>
+        let app = false
+
+        function inicializar() {
+            app = JSON.parse(localStorage.getItem("app"))
+            if (!app) {
+                app = {
+                    logado: true,
+                    alcadas: ["Ação A", "Ação B", "Ação C"], 
+                    usuarios: [
+                        {nome: "João", permissoes: [true, false, true]},
+                        {nome: "Maria", permissoes: [false, true, true]},
+                    ]
+                }
+            }
+            renderizar()
+        }
+
+        function renderizar() {
+            document.querySelector("#login").style.display = "block"
+            document.querySelector("#aplicativo").style.display = "none"
+            if (!app.logado) {
+                return;
+            }
+
+            document.querySelector("#login").style.display = "none"
+            document.querySelector("#aplicativo").style.display = "block"
+
+            const tbody = document.querySelector("tbody")
+            tbody.replaceChildren()
+            app.usuarios.forEach((usuario, keyUsuario) => {
+                tbody.insertAdjacentHTML("beforeend", `<tr> <td>${usuario.nome}</td> <td onclick="definePermissao(${keyUsuario},0)">${usuario.permissoes[0]?"OK":"X"}</td> <td  onclick="definePermissao(${keyUsuario},1)">${usuario.permissoes[1]?"OK":"X"}</td> <td onclick="definePermissao(${keyUsuario},2)">${usuario.permissoes[2]?"OK":"X"}</td> </tr>`)
+            })
+        }
+
+        function adicionarUsuario() {
+            const nome = document.querySelector("input#usuario").value
+            app.usuarios.push({nome: nome, permissoes: [false, false, false]})
+            renderizar()
+            persistir()
+        }
+
+        function adicionarAlcada() {
+            const nome = document.querySelector("input#alcada").value
+            app.alcadas.push(nome)
+            renderizar()
+            persistir()
+        }
+
+        function definePermissao(keyUsuario, keyAlcada) {
+            app.usuarios[keyUsuario].permissoes[keyAlcada] = !app.usuarios[keyUsuario].permissoes[keyAlcada]
+            renderizar()
+            persistir()
+        }
+
+        function persistir() {
+            localStorage.setItem("app", JSON.stringify(app));
+        }
+
+        inicializar()
+    </script>
+</body>
+</html>
